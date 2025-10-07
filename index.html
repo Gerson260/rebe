@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reconocimiento Acústico Neonatal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 1400px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-container {
+            max-width: 450px;
+            padding: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-icon {
+            font-size: 80px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin: 15px 0 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h2 {
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 14px 28px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab.active::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            animation: slideRight 0.3s ease-out;
+        }
+
+        @keyframes slideRight {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .audio-recorder {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .record-btn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .record-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .record-btn:hover::after {
+            width: 200px;
+            height: 200px;
+        }
+
+        .record-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .record-btn.recording {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 12px 35px rgba(231, 76, 60, 0.6);
+            }
+        }
+
+        .waveform {
+            display: none;
+            width: 100%;
+            height: 80px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waveform.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .wave-bar {
+            width: 4px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 2px;
+            animation: wave 0.8s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { height: 10px; }
+            50% { height: 60px; }
+        }
+
+        .wave-bar:nth-child(1) { animation-delay: 0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+        .wave-bar:nth-child(6) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(7) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(8) { animation-delay: 0.1s; }
+
+        #recordStatus {
+            font-size: 16px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .analysis-result {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+            border: 2px solid #e0e0e0;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .result-item:hover {
+            background: #f8f9fa;
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 8px;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+            transition: width 1s ease-out;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .alert {
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 2px solid #b1dfbb;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 2px solid #ffe69c;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 2px solid #f1b0b7;
+        }
+
+        .patient-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .patient-form .form-group {
+            margin-bottom: 0;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: all 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, white, #f8f9fa);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .stat-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .stat-value {
+            font-size: 40px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideInRight 0.4s ease-out;
+            display: none;
+            max-width: 350px;
+        }
+
+        @keyframes slideInRight {
+            from { 
+                opacity: 0; 
+                transform: translateX(100px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification-success {
+            border-left: 4px solid #28a745;
+        }
+
+        .notification-error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .patient-form {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notificación -->
+    <div class="notification" id="notification">
+        <p id="notificationText"></p>
+    </div>
+
+    <!-- Login Container -->
+    <div class="container login-container" id="loginContainer">
+        <div class="logo">
+            <div class="logo-icon">🍼</div>
+            <h1>Sistema Neonatal</h1>
+            <p>Reconocimiento de Patrones Acústicos</p>
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">👤 Usuario</label>
+                <input type="text" id="username" placeholder="Ingrese su usuario" required>
+            </div>
+            <div class="form-group">
+                <label for="password">🔒 Contraseña</label>
+                <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+            </div>
+            <button type="submit" class="btn">Iniciar Sesión</button>
+        </form>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div class="container dashboard" id="dashboardContainer">
+        <div class="header">
+            <h2><span>🍼</span> Panel de Control - Sistema Neonatal</h2>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión 👋</button>
+        </div>
+
+        <div class="content">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('analysis')">🎤 Análisis Acústico</button>
+                <button class="tab" onclick="showTab('patients')">👶 Pacientes</button>
+                <button class="tab" onclick="showTab('history')">📋 Historial</button>
+                <button class="tab" onclick="showTab('stats')">📊 Estadísticas</button>
+            </div>
+
+            <!-- Tab: Análisis Acústico -->
+            <div class="tab-content active" id="analysisTab">
+                <div class="card">
+                    <h3>🎙️ Grabación y Análisis de Audio</h3>
+                    <div class="audio-recorder">
+                        <button class="record-btn" id="recordBtn" onclick="toggleRecording()">
+                            🎤<br>Grabar
+                        </button>
+                        <div class="waveform" id="waveform">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
+                        <p id="recordStatus">Presiona el botón para iniciar la grabación</p>
+                    </div>
+                    <div class="analysis-result" id="analysisResult" style="display: none;">
+                        <h4>📈 Resultados del Análisis</h4>
+                        <div class="result-item">
+                            <span class="result-label">😢 Tipo de Llanto:</span>
+                            <span class="result-value" id="cryType">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">🍽️ Nivel de Hambre:</span>
+                            <span class="result-value" id="hungerLevel">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">📊 Confianza del Modelo:</span>
+                            <span class="result-value" id="confidence">-</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="confidenceBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">🎵 Frecuencia Dominante:</span>
+                            <span class="result-value" id="frequency">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">🔊 Intensidad:</span>
+                            <span class="result-value" id="intensity">-</span>
+                        </div>
+                        <div class="alert" id="recommendation"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📝 Registro de Paciente</h3>
+                    <form class="patient-form" id="patientForm">
+                        <div class="form-group">
+                            <label>👶 Nombre del Neonato</label>
+                            <input type="text" id="patientName" placeholder="Ej: María López" required>
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Edad (días)</label>
+                            <input type="number" id="patientAge" placeholder="Ej: 15" required>
+                        </div>
+                        <div class="form-group">
+                            <label>⚖️ Peso (kg)</label>
+                            <input type="number" step="0.1" id="patientWeight" placeholder="Ej: 3.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>🆔 ID Paciente</label>
+                            <input type="text" id="patientId" placeholder="Ej: NEO-001" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <button type="submit" class="btn">💾 Guardar Paciente</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab: Pacientes -->
+            <div class="tab-content" id="patientsTab">
+                <div class="card">
+                    <h3>👶 Lista de Pacientes Registrados</h3>
+                    <table id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>🆔 ID</th>
+                                <th>👶 Nombre</th>
+                                <th>📅 Edad (días)</th>
+                                <th>⚖️ Peso (kg)</th>
+                                <th>✅ Estado</th>
+                                <th>⚙️ Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #999; padding: 40px;">
+                                    No hay pacientes registrados<br>
+                                    <small>Registra tu primer paciente en la pestaña "Análisis Acústico"</small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Historial -->
+            <div class="tab-content" id="historyTab">
+                <div class="card">
+                    <h3>📋 Historial de Análisis Realizados</h3>
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>🕐 Fecha/Hora</th>
+                                <th>👶 Paciente</th>
+                                <th>😢 Tipo de Llanto</th>
+                                <th>🍽️ Nivel Hambre</th>
+                                <th>💡 Recomendación</th>
+                                <th>⚙️ Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #999; padding: 40px;">
+                                    No hay análisis registrados<br>
+                                    <small>Realiza tu primer análisis de audio</small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Estadísticas -->
+            <div class="tab-content" id="statsTab">
+                <h3>📊 Estadísticas Generales del Sistema</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👶</div>
+                        <div class="stat-value" id="totalPatients">0</div>
+                        <div class="stat-label">Total Pacientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎤</div>
+                        <div class="stat-value" id="totalAnalysis">0</div>
+                        <div class="stat-label">Análisis Realizados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚠️</div>
+                        <div class="stat-value" id="totalAlerts">0</div>
+                        <div class="stat-label">Alertas Alimentarias</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value" id="avgAccuracy">95%</div>
+                        <div class="stat-label">Precisión Promedio</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Distribución de Tipos de Llanto</h3>
+                    <div class="chart-container" id="chartContainer">
+                        <canvas id="cryTypeChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>⏱️ Actividad Reciente</h3>
+                    <div id="recentActivity">
+                        <p style="text-align: center; color: #999; padding: 20px;">No hay actividad reciente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let isRecording = false;
+        let patients = [];
+        let analysisHistory = [];
+        let recordingTimer = null;
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Validación simple (en producción usar autenticación real)
+            if (username === 'admin' && password === 'admin123') {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'block';
+                showNotification('¡Bienvenido al sistema! 👋', 'success');
+            } else {
+                showNotification('❌ Usuario o contraseña incorrectos', 'error');
+            }
+        });
+
+        // Logout
+        function logout() {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                document.getElementById('dashboardContainer').style.display = 'none';
+                document.getElementById('loginContainer').style.display = 'block';
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                showNotification('Sesión cerrada exitosamente', 'success');
+            }
+        }
+
+        // Notificaciones
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            notification.className = `notification notification-${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Tabs
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            if (tabName === 'stats') {
+                updateChart();
+            }
+        }
+
+        // Grabación de audio
+        function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            const status = document.getElementById('recordStatus');
+            const waveform = document.getElementById('waveform');
+
+            if (!isRecording) {
+                isRecording = true;
+                btn.classList.add('recording');
+                btn.innerHTML = '⏹️<br>Detener';
+                status.textContent = '🔴 Grabando... Analizando patrones acústicos';
+                waveform.classList.add('active');
+                
+                showNotification('🎤 Grabación iniciada', 'success');
+
+                // Simular análisis después de 3 segundos
+                recordingTimer = setTimeout(analyzeAudio, 3000);
+            } else {
+                stopRecording();
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            const btn = document.getElementById('recordBtn');
+            const waveform = document.getElementById('waveform');
+            
+            btn.classList.remove('recording');
+            btn.innerHTML = '🎤<br>Grabar';
+            waveform.classList.remove('active');
+            
+            if (recordingTimer) {
+                clearTimeout(recordingTimer);
+            }
+        }
+
+        function analyzeAudio() {
+            stopRecording();
+            document.getElementById('recordStatus').textContent = '⚙️ Procesando audio con Machine Learning...';
+
+            setTimeout(() => {
+                // Simulación de análisis ML
+                const cryTypes = ['Hambre', 'Dolor', 'Sueño', 'Incomodidad', 'Cólicos'];
+                const hungerLevels = ['Bajo', 'Medio', 'Alto', 'Crítico'];
+                
+                const cryType = cryTypes[Math.floor(Math.random() * cryTypes.length)];
+                const hungerLevel = hungerLevels[Math.floor(Math.random() * hungerLevels.length)];
+                const frequency = (300 + Math.random() * 200).toFixed(2);
+                const intensity = (60 + Math.random() * 30).toFixed(2);
+                const confidence = (85 + Math.random() * 14).toFixed(1);
+
+                document.getElementById('cryType').textContent = cryType;
+                document.getElementById('hungerLevel').textContent = hungerLevel;
+                document.getElementById('frequency').textContent = frequency + ' Hz';
+                document.getElementById('intensity').textContent = intensity + ' dB';
+                document.getElementById('confidence').textContent = confidence + '%';
+                document.getElementById('confidenceBar').style.width = confidence + '%';
+
+                const recommendation = document.getElementById('recommendation');
+                
+                if (hungerLevel === 'Alto' || hungerLevel === 'Crítico') {
+                    recommendation.className = 'alert alert-danger';
+                    recommendation.innerHTML = '<span style="font-size: 24px;">⚠️</span> <strong>RECOMENDACIÓN URGENTE:</strong> Alimentar al neonato inmediatamente. Nivel de hambre crítico detectado.';
+                    showNotification('⚠️ Alerta: Hambre crítica detectada', 'error');
+                } else if (hungerLevel === 'Medio') {
+                    recommendation.className = 'alert alert-warning';
+                    recommendation.innerHTML = '<span style="font-size: 24px;">⚡</span> <strong>RECOMENDACIÓN:</strong> Considerar alimentación en los próximos 15-30 minutos.';
+                    showNotification('⚡ Atención: Nivel de hambre medio', 'success');
+                } else {
+                    recommendation.className = 'alert alert-success';
+                    recommendation.innerHTML = '<span style="font-size: 24px;">✅</span> <strong>ESTADO NORMAL:</strong> No se detecta hambre inmediata. Continuar monitoreo regular.';
+                    showNotification('✅ Análisis completado exitosamente', 'success');
+                }
+
+                document.getElementById('analysisResult').style.display = 'block';
+                document.getElementById('recordStatus').textContent = '✅ Análisis completado - Listo para nueva grabación';
+
+                // Agregar al historial
+                addToHistory(cryType, hungerLevel, confidence);
+                updateStats();
+            }, 1500);
+        }
+
+        // Gestión de pacientes
+        document.getElementById('patientForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const patient = {
+                id: document.getElementById('patientId').value,
+                name: document.getElementById('patientName').value,
+                age: document.getElementById('patientAge').value,
+                weight: document.getElementById('patientWeight').value,
+                status: 'Activo',
+                registeredDate: new Date().toLocaleString('es-ES')
+            };
+
+            patients.push(patient);
+            updatePatientsTable();
+            updateStats();
+            this.reset();
+            showNotification('✅ Paciente registrado exitosamente: ' + patient.name, 'success');
+        });
+
+        function updatePatientsTable() {
+            const tbody = document.getElementById('patientsTableBody');
+            
+            if (patients.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999; padding: 40px;">No hay pacientes registrados<br><small>Registra tu primer paciente en la pestaña "Análisis Acústico"</small></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = patients.map((p, index) => `
+                <tr>
+                    <td><strong>${p.id}</strong></td>
+                    <td>${p.name}</td>
+                    <td>${p.age} días</td>
+                    <td>${p.weight} kg</td>
+                    <td><span class="badge badge-success">${p.status}</span></td>
+                    <td>
+                        <button class="delete-btn" onclick="deletePatient(${index})">🗑️ Eliminar</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deletePatient(index) {
+            if (confirm('¿Estás seguro de eliminar este paciente?')) {
+                const patient = patients[index];
+                patients.splice(index, 1);
+                updatePatientsTable();
+                updateStats();
+                showNotification('🗑️ Paciente eliminado: ' + patient.name, 'success');
+            }
+        }
+
+        function addToHistory(cryType, hungerLevel, confidence) {
+            const now = new Date();
+            const record = {
+                date: now.toLocaleString('es-ES'),
+                patient: patients.length > 0 ? patients[patients.length - 1].name : 'Sin asignar',
+                cryType: cryType,
+                hungerLevel: hungerLevel,
+                confidence: confidence,
+                recommendation: hungerLevel === 'Alto' || hungerLevel === 'Crítico' ? 'Alimentar inmediatamente' : hungerLevel === 'Medio' ? 'Alimentar pronto' : 'Monitoreo regular'
+            };
+
+            analysisHistory.unshift(record);
+            updateHistoryTable();
+            updateRecentActivity();
+        }
+
+        function updateHistoryTable() {
+            const tbody = document.getElementById('historyTableBody');
+            
+            if (analysisHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999; padding: 40px;">No hay análisis registrados<br><small>Realiza tu primer análisis de audio</small></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = analysisHistory.map((h, index) => `
+                <tr>
+                    <td>${h.date}</td>
+                    <td><strong>${h.patient}</strong></td>
+                    <td>${h.cryType}</td>
+                    <td><span class="badge ${h.hungerLevel === 'Alto' || h.hungerLevel === 'Crítico' ? 'badge-danger' : h.hungerLevel === 'Medio' ? 'badge-warning' : 'badge-success'}">${h.hungerLevel}</span></td>
+                    <td>${h.recommendation}</td>
+                    <td>
+                        <button class="delete-btn" onclick="deleteHistory(${index})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteHistory(index) {
+            if (confirm('¿Eliminar este registro del historial?')) {
+                analysisHistory.splice(index, 1);
+                updateHistoryTable();
+                updateStats();
+                updateChart();
+                showNotification('🗑️ Registro eliminado', 'success');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalPatients').textContent = patients.length;
+            document.getElementById('totalAnalysis').textContent = analysisHistory.length;
+            
+            const alerts = analysisHistory.filter(h => h.hungerLevel === 'Alto' || h.hungerLevel === 'Crítico').length;
+            document.getElementById('totalAlerts').textContent = alerts;
+        }
+
+        function updateRecentActivity() {
+            const container = document.getElementById('recentActivity');
+            
+            if (analysisHistory.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No hay actividad reciente</p>';
+                return;
+            }
+
+            const recent = analysisHistory.slice(0, 5);
+            container.innerHTML = recent.map(h => `
+                <div class="result-item">
+                    <div>
+                        <strong>${h.date}</strong><br>
+                        <small>Paciente: ${h.patient} | Tipo: ${h.cryType} | Confianza: ${h.confidence}%</small>
+                    </div>
+                    <span class="badge ${h.hungerLevel === 'Alto' || h.hungerLevel === 'Crítico' ? 'badge-danger' : h.hungerLevel === 'Medio' ? 'badge-warning' : 'badge-success'}">${h.hungerLevel}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateChart() {
+            const canvas = document.getElementById('cryTypeChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (analysisHistory.length === 0) {
+                ctx.fillStyle = '#999';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('No hay datos para mostrar', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // Contar tipos de llanto
+            const cryTypeCounts = {};
+            analysisHistory.forEach(h => {
+                cryTypeCounts[h.cryType] = (cryTypeCounts[h.cryType] || 0) + 1;
+            });
+
+            const types = Object.keys(cryTypeCounts);
+            const counts = Object.values(cryTypeCounts);
+            const maxCount = Math.max(...counts);
+            
+            const barWidth = canvas.width / types.length - 20;
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b'];
+
+            types.forEach((type, index) => {
+                const barHeight = (counts[index] / maxCount) * (canvas.height - 60);
+                const x = index * (barWidth + 20) + 20;
+                const y = canvas.height - barHeight - 30;
+
+                // Gradiente
+                const gradient = ctx.createLinearGradient(x, y, x, canvas.height - 30);
+                gradient.addColorStop(0, colors[index % colors.length]);
+                gradient.addColorStop(1, colors[(index + 1) % colors.length]);
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barWidth, barHeight);
+
+                // Texto
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(counts[index], x + barWidth / 2, y - 5);
+                
+                ctx.font = '12px Arial';
+                ctx.fillText(type, x + barWidth / 2, canvas.height - 10);
+            });
+        }
+
+        // Inicializar
+        updateStats();
+    </script>
+</body>
+</html>
